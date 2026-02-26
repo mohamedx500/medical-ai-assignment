@@ -219,25 +219,29 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex gap-4 overflow-hidden">
+      <div className="flex h-[calc(100vh-8rem)] w-full rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         {/* ── Chat History Sidebar ── */}
-        <Card className="hidden md:flex w-64 flex-col overflow-hidden border-border/50">
-          <div className="p-4 border-b border-border/50">
-            <Button onClick={handleNewChat} className="w-full justify-start gap-2" variant="outline">
+        <div className="hidden md:flex w-72 flex-shrink-0 flex-col border-e border-border bg-muted/30">
+          <div className="p-4 border-b border-border">
+            <Button onClick={handleNewChat} className="w-full justify-start gap-2 shadow-sm" variant="outline">
               <Plus className="w-4 h-4" /> {locale === "ar" ? "محادثة جديدة" : "New Chat"}
             </Button>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {sessions.map((session) => (
-              <Button
+              <div
                 key={session.id}
-                variant={session.id === sessionId ? "secondary" : "ghost"}
-                className={cn("w-full justify-start text-left px-3 font-normal", session.id === sessionId && "bg-secondary/50 font-medium")}
                 onClick={() => loadSession(session.id)}
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+                  session.id === sessionId
+                    ? "bg-muted dark:bg-zinc-800 text-foreground"
+                    : "hover:bg-muted/50 text-muted-foreground"
+                )}
               >
-                <MessageSquare className="w-4 h-4 me-3 shrink-0 opacity-70" />
-                <span className="truncate flex-1">{session.title}</span>
-              </Button>
+                <MessageSquare className="w-4 h-4 shrink-0 opacity-70" />
+                <span className="truncate flex-1 text-sm font-medium">{session.title}</span>
+              </div>
             ))}
             {sessions.length === 0 && (
               <p className="text-xs text-center text-muted-foreground mt-4 px-4">
@@ -245,43 +249,42 @@ export default function ChatPage() {
               </p>
             )}
           </div>
-        </Card>
+        </div>
 
         {/* ── Chat Area ── */}
-        <Card className="flex-1 flex flex-col overflow-hidden border-border/50">
+        <div className="flex-1 flex flex-col bg-background">
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={cn(
-                  "flex gap-3 max-w-[85%]",
-                  msg.role === "user" ? "ms-auto flex-row-reverse" : "",
+                  "flex gap-3 max-w-[75%]",
+                  msg.role === "user" ? "self-end ms-auto flex-row-reverse" : "self-start",
                 )}
               >
                 {/* Avatar */}
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
+                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 shadow-sm",
                     msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted",
+                      ? "bg-primary text-primary-foreground shadow-primary/20"
+                      : "bg-muted border border-border",
                   )}
                 >
                   {msg.role === "user" ? (
                     <User className="w-4 h-4" />
                   ) : (
-                    <Bot className="w-4 h-4" />
+                    <Bot className="w-4 h-4 text-foreground/80" />
                   )}
                 </div>
 
-                {/* Bubble */}
                 <div
                   className={cn(
-                    "rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                    "px-4 py-2 text-sm leading-relaxed rounded-2xl",
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground rounded-tr-sm"
-                      : "bg-muted/50 border border-border/50 rounded-tl-sm",
+                      : "bg-muted text-foreground rounded-tl-sm",
                   )}
                 >
                   {formatContent(msg.content)}
@@ -291,11 +294,11 @@ export default function ChatPage() {
 
             {/* Typing indicator */}
             {loading && (
-              <div className="flex gap-3">
+              <div className="flex gap-3 max-w-[75%] self-start">
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                  <Bot className="w-4 h-4" />
+                  <Bot className="w-4 h-4 text-foreground/80" />
                 </div>
-                <div className="bg-muted/50 border border-border/50 rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="bg-muted text-foreground px-4 py-2 rounded-2xl rounded-tl-sm">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
                     <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
@@ -309,8 +312,8 @@ export default function ChatPage() {
           </div>
 
           {/* ── Input Area ── */}
-          <div className="border-t border-border/50 p-4">
-            <div className="flex items-end gap-3">
+          <div className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
+            <div className="flex items-end gap-3 w-full">
               <Textarea
                 ref={textareaRef}
                 placeholder={t("typeMessage")}
@@ -318,13 +321,13 @@ export default function ChatPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={1}
-                className="resize-none min-h-[44px] max-h-[150px] text-sm rounded-xl border-border/50 focus-visible:ring-primary/30"
+                className="flex-1 resize-none min-h-[44px] max-h-[150px] text-sm rounded-xl border-border focus-visible:ring-primary/50 shadow-sm bg-background"
               />
               <Button
                 onClick={handleSend}
                 disabled={!input.trim() || loading}
                 size="icon"
-                className="h-11 w-11 rounded-xl shrink-0"
+                className="h-11 w-11 rounded-xl shrink-0 transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -334,7 +337,7 @@ export default function ChatPage() {
               </Button>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
