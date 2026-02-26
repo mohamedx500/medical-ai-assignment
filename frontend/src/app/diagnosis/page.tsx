@@ -198,20 +198,8 @@ export default function DiagnosisPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-2 rounded-md font-medium transition-colors"
-                size="lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t("analyzing")}
-                  </>
-                ) : (
-                  t("runDiagnosis")
-                )}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("analyzing")}</> : t("runDiagnosis")}
               </Button>
             </form>
           </CardContent>
