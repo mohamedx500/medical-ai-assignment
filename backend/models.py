@@ -9,7 +9,7 @@ import enum
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Integer, Text, DateTime, Enum, ForeignKey,
+    Column, String, Integer, Text, DateTime, Enum, ForeignKey, Boolean
 )
 from sqlalchemy.orm import relationship
 from database import Base
@@ -70,6 +70,7 @@ class ChatSession(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     title = Column(String, default="New Chat")
+    is_pinned = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_utcnow)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 

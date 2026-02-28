@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Bot, User, Sparkles, Plus, MessageSquare } from "lucide-react";
+import { Send, Loader2, Bot, User, Sparkles, Plus, MessageSquare, Pin, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,7 @@ interface ChatSession {
   created_at: string;
   updated_at: string;
   message_count: number;
+  is_pinned?: boolean;
 }
 
 export default function ChatPage() {
@@ -84,6 +85,37 @@ export default function ChatPage() {
   const handleNewChat = () => {
     setSessionId(null);
     setMessages([getInitialMessage()]);
+  };
+
+  const deleteSession = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!token) return;
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      await fetch(`${API}/api/chat/sessions/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (sessionId === id) handleNewChat();
+      fetchSessions();
+    } catch (err) {
+      console.error("Failed to delete", err);
+    }
+  };
+
+  const pinSession = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!token) return;
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      await fetch(`${API}/api/chat/sessions/${id}/pin`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchSessions();
+    } catch (err) {
+      console.error("Failed to pin", err);
+    }
   };
 
   const loadSession = async (id: number) => {
@@ -229,15 +261,43 @@ export default function ChatPage() {
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {sessions.map((session) => (
-              <Button
-                key={session.id}
-                variant={session.id === sessionId ? "default" : "ghost"}
-                className={cn("w-full justify-start text-left px-3 font-normal drop-shadow-sm", session.id === sessionId && "font-medium")}
-                onClick={() => loadSession(session.id)}
-              >
-                <MessageSquare className="w-4 h-4 me-3 shrink-0 opacity-70" />
-                <span className="truncate flex-1">{session.title}</span>
-              </Button>
+              <div key={session.id} className="group relative flex items-center">
+                <Button
+                  variant={session.id === sessionId ? "default" : "ghost"}
+                  className={cn("w-full justify-start text-left px-3 font-normal drop-shadow-sm pe-16", session.id === sessionId && "font-medium")}
+                  onClick={() => loadSession(session.id)}
+                >
+                  <MessageSquare className={cn("w-4 h-4 me-3 shrink-0", session.id === sessionId ? "opacity-100" : "opacity-70")} />
+                  <span className="truncate flex-1">{session.title}</span>
+                </Button>
+
+                {/* Actions */}
+                <div className="absolute end-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:bg-background/20 hover:text-primary"
+                    onClick={(e) => pinSession(session.id, e)}
+                  >
+                    <Pin className={cn("w-3.5 h-3.5", session.is_pinned && "fill-current text-primary")} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:bg-background/20 hover:text-destructive"
+                    onClick={(e) => deleteSession(session.id, e)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+
+                {/* Pinned Icon Always Visible if Pinned and not hovering */}
+                {session.is_pinned && (
+                  <div className="absolute end-3 group-hover:opacity-0 transition-opacity text-primary pointer-events-none">
+                    <Pin className="w-3.5 h-3.5 fill-current" />
+                  </div>
+                )}
+              </div>
             ))}
             {sessions.length === 0 && (
               <p className="text-xs text-center text-muted-foreground mt-4 px-4">

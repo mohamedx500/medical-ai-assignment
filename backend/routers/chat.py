@@ -57,7 +57,7 @@ def list_sessions(
     sessions = (
         db.query(ChatSession)
         .filter(ChatSession.user_id == user.id)
-        .order_by(ChatSession.updated_at.desc())
+        .order_by(ChatSession.is_pinned.desc(), ChatSession.updated_at.desc())
         .limit(50)
         .all()
     )
@@ -70,6 +70,7 @@ def list_sessions(
                 "created_at": s.created_at.isoformat() if s.created_at else None,
                 "updated_at": s.updated_at.isoformat() if s.updated_at else None,
                 "message_count": len(s.messages),
+                "is_pinned": getattr(s, "is_pinned", False),
             }
             for s in sessions
         ]
@@ -124,6 +125,26 @@ def delete_session(
     db.delete(session)
     db.commit()
     return {"ok": True}
+
+
+@router.patch("/sessions/{session_id}/pin")
+def toggle_pin_session(
+    session_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Toggle the pinned state of a chat session."""
+    session = db.query(ChatSession).filter(
+        ChatSession.id == session_id,
+        ChatSession.user_id == user.id,
+    ).first()
+
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+    session.is_pinned = not session.is_pinned
+    db.commit()
+    return {"ok": True, "is_pinned": session.is_pinned}
 
 
 @router.post("/send", response_model=ChatResponse)
