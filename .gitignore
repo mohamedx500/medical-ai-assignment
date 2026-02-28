@@ -40,3 +40,6 @@ dist/
 
 # MacOS
 .DS_Store
+
+# Template files
+!*.example
