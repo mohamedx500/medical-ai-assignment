@@ -92,7 +92,7 @@ export default function MotionCard({
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={cn(
         // ── Base card styles ──
-        "relative rounded-xl border border-border bg-card text-card-foreground",
+        "relative rounded-xl border border-border bg-card text-card-foreground shadow-sm",
         // ── Glassmorphism ──
         "backdrop-blur-sm bg-card/80",
         // ── Smooth transitions for non-transform properties ──

@@ -134,7 +134,13 @@ export default function DashboardPage() {
 
       {/* ── Developer: Extra system metrics ── */}
       {role === "DEVELOPER" && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <motion.div
+          key={`extra-metrics-${role}`}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        >
           <MotionCard className="p-5">
             <div className="flex items-center gap-2 mb-2">
               <Server className="w-4 h-4 text-muted-foreground" />
@@ -156,7 +162,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-xl font-bold">{s.total_messages ?? "—"}</p>
           </MotionCard>
-        </div>
+        </motion.div>
       )}
 
       {/* ── Quick Actions ── */}
